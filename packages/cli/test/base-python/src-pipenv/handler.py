@@ -8,8 +8,10 @@ def helloA(event, context):
   }
 
   return {
-    "statusCode": 200,
-    "body": "Hello, World! Your request was received at {}.".format(event['requestContext']['time'])
+      "statusCode":
+      200,
+      "body":
+      f"Hello, World! Your request was received at {event['requestContext']['time']}.",
   }
 
 def helloB(event, context):

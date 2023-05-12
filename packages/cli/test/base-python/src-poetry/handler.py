@@ -7,12 +7,7 @@ def helloA(event, context):
     "input": event
   }
 
-  response = {
-    "statusCode": 200,
-    "body": json.dumps(body)
-  }
-
-  return response
+  return {"statusCode": 200, "body": json.dumps(body)}
 
 def helloB(event, context):
     return {

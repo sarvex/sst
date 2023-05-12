@@ -67,7 +67,7 @@ if __name__ == '__main__':
     sys.path.append('.')
 
     # fetch request
-    url = "http://{}/2018-06-01/runtime/invocation/next".format(os.environ['AWS_LAMBDA_RUNTIME_API'])
+    url = f"http://{os.environ['AWS_LAMBDA_RUNTIME_API']}/2018-06-01/runtime/invocation/next"
     r = request.urlopen(url)
     event = json.loads(r.read())
     context = Context(
@@ -105,11 +105,8 @@ if __name__ == '__main__':
         data = json.dumps(result).encode("utf-8")
 
     # send response
-    if has_error == False:
-        url_destination = '/response'
-    else:
-        url_destination = '/error'
-    url = "http://{}/2018-06-01/runtime/invocation/{}{}".format(os.environ['AWS_LAMBDA_RUNTIME_API'], context.aws_request_id, url_destination)
+    url_destination = '/response' if not has_error else '/error'
+    url = f"http://{os.environ['AWS_LAMBDA_RUNTIME_API']}/2018-06-01/runtime/invocation/{context.aws_request_id}{url_destination}"
     req =  request.Request(url, method="POST", data=data)
     req.add_header('Content-Type', 'application/json')
     r = request.urlopen(req, data=data)

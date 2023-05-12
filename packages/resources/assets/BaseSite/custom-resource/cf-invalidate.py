@@ -29,7 +29,7 @@ CFN_FAILED = "FAILED"
 def handler(event, context):
 
     def cfn_error(message=None):
-        logger.error("| cfn_error: %s" % message)
+        logger.error(f"| cfn_error: {message}")
         cfn_send(event, context, CFN_FAILED, reason=message)
 
     try:
@@ -48,25 +48,26 @@ def handler(event, context):
             distribution_paths = props.get('DistributionPaths', ['/*'])
             wait_for_invalidation = props.get('WaitForInvalidation', 'true')
         except KeyError as e:
-            cfn_error("missing request resource property %s. props: %s" % (str(e), props))
+            cfn_error(f"missing request resource property {str(e)}. props: {props}")
             return
 
         # if we are creating a new resource, allocate a physical id for it
         # otherwise, we expect physical id to be relayed by cloudformation
         if request_type == "Create":
-            physical_id = "aws.cdk.s3deployment.%s" % str(uuid4())
+            physical_id = f"aws.cdk.s3deployment.{str(uuid4())}"
         else:
             if not physical_id:
-                cfn_error("invalid request: request type is '%s' but 'PhysicalResourceId' is not defined" % request_type)
+                cfn_error(
+                    f"invalid request: request type is '{request_type}' but 'PhysicalResourceId' is not defined"
+                )
                 return
 
-        if request_type == "Update" or request_type == "Create":
-            if distribution_id:
-                cloudfront_invalidate(distribution_id, distribution_paths, wait_for_invalidation)
+        if request_type in ["Update", "Create"] and distribution_id:
+            cloudfront_invalidate(distribution_id, distribution_paths, wait_for_invalidation)
 
         cfn_send(event, context, CFN_SUCCESS, physicalResourceId=physical_id)
     except KeyError as e:
-        cfn_error("invalid request. Missing key %s" % str(e))
+        cfn_error(f"invalid request. Missing key {str(e)}")
     except Exception as e:
         logger.exception(e)
         cfn_error(str(e))
@@ -93,7 +94,7 @@ def cloudfront_invalidate(distribution_id, distribution_paths, wait_for_invalida
 # executes an "aws" cli command
 def aws_command(*args):
     aws="/opt/awscli/aws" # from AwsCliLayer
-    logger.info("| aws %s" % ' '.join(args))
+    logger.info(f"| aws {' '.join(args)}")
     subprocess.check_call([aws] + list(args))
 
 #---------------------------------------------------------------------------------------------------
@@ -103,16 +104,17 @@ def cfn_send(event, context, responseStatus, responseData={}, physicalResourceId
     responseUrl = event['ResponseURL']
     logger.info(responseUrl)
 
-    responseBody = {}
-    responseBody['Status'] = responseStatus
-    responseBody['Reason'] = reason or ('See the details in CloudWatch Log Stream: ' + context.log_stream_name)
-    responseBody['PhysicalResourceId'] = physicalResourceId or context.log_stream_name
-    responseBody['StackId'] = event['StackId']
-    responseBody['RequestId'] = event['RequestId']
-    responseBody['LogicalResourceId'] = event['LogicalResourceId']
-    responseBody['NoEcho'] = noEcho
-    responseBody['Data'] = responseData
-
+    responseBody = {
+        'Status': responseStatus,
+        'Reason': reason
+        or f'See the details in CloudWatch Log Stream: {context.log_stream_name}',
+        'PhysicalResourceId': physicalResourceId or context.log_stream_name,
+        'StackId': event['StackId'],
+        'RequestId': event['RequestId'],
+        'LogicalResourceId': event['LogicalResourceId'],
+        'NoEcho': noEcho,
+        'Data': responseData,
+    }
     body = json.dumps(responseBody)
     logger.info("| response body:\n" + body)
 
@@ -124,7 +126,7 @@ def cfn_send(event, context, responseStatus, responseData={}, physicalResourceId
     try:
         request = Request(responseUrl, method='PUT', data=bytes(body.encode('utf-8')), headers=headers)
         with contextlib.closing(urlopen(request)) as response:
-          logger.info("| status code: " + response.reason)
+            logger.info(f"| status code: {response.reason}")
     except Exception as e:
         logger.error("| unable to send response to CloudFormation")
         logger.exception(e)
