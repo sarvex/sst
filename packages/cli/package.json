@@ -28,7 +28,7 @@
     "@serverless-stack/core": "1.18.4",
     "@serverless-stack/resources": "1.18.4",
     "aws-cdk": "2.50.0",
-    "aws-cdk-lib": "2.50.0",
+    "aws-cdk-lib": "2.80.0",
     "aws-sdk": "^2.1110.0",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
