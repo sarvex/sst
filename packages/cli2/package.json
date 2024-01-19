@@ -37,7 +37,7 @@
     "solid-ink": "^0.0.6",
     "solid-js": "^1.4.8",
     "undici": "^5.8.2",
-    "vite": "^3.0.5",
+    "vite": "^2.9.17",
     "vite-node": "^0.21.1",
     "vite-plugin-solid": "^2.3.0"
   },
