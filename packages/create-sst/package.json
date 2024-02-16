@@ -27,7 +27,7 @@
     "inquirer": "^8.2.2",
     "node-fetch": "3.2.10",
     "ora": "^6.1.0",
-    "undici": "^5.9.1"
+    "undici": "^5.28.3"
   },
   "gitHead": "8ac2d0abc11d5de721c87658bb445e3d6c211dcf",
   "devDependencies": {
